@@ -242,7 +242,7 @@ macro_rules! impl_from_i2c_bus_error {
             fn from(e: i2c::BusError) -> Self {
                 match e {
                     i2c::BusError::LinuxI2CError(e) => match e {
-                        i2cdev::linux::LinuxI2CError::Nix(e) => match e {
+                        i2cdev2::linux::LinuxI2CError::Nix(e) => match e {
                             nix::Error::Sys(e) => $type::TransactionFailed(models::I2cBusError {
                                 error: Some(e as i32),
                                 description: Some(format!("{:?}", e)),
@@ -252,7 +252,7 @@ macro_rules! impl_from_i2c_bus_error {
                                 description: Some(format!("{:?}", e)),
                             }),
                         },
-                        i2cdev::linux::LinuxI2CError::Io(e) => {
+                        i2cdev2::linux::LinuxI2CError::Io(e) => {
                             $type::TransactionFailed(models::I2cBusError {
                                 error: Some(e.raw_os_error().unwrap()),
                                 description: Some(format!("{:?}", e)),
