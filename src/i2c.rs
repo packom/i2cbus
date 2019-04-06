@@ -1,5 +1,5 @@
-use i2cdev::core::I2CBus;
-use i2cdev::linux::{I2CMsg, LinuxI2CBus, LinuxI2CError};
+use i2cdev2::core::I2CBus;
+use i2cdev2::linux::{I2CMsg, LinuxI2CBus, LinuxI2CError};
 use std::error::Error;
 use std::fmt;
 use std::fs::read_dir;
@@ -136,8 +136,8 @@ impl From<std::io::Error> for BusError {
     }
 }
 
-impl From<i2cdev::linux::LinuxI2CError> for BusError {
-    fn from(err: i2cdev::linux::LinuxI2CError) -> BusError {
+impl From<i2cdev2::linux::LinuxI2CError> for BusError {
+    fn from(err: i2cdev2::linux::LinuxI2CError) -> BusError {
         BusError::LinuxI2CError(err)
     }
 }
