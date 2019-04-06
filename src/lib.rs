@@ -6,7 +6,7 @@ extern crate i2cbus_api;
 extern crate swagger;
 #[macro_use]
 extern crate error_chain;
-extern crate i2cdev;
+extern crate i2cdev2;
 #[macro_use]
 extern crate lazy_static;
 #[macro_use]
