@@ -1,0 +1,60 @@
+
+General
+-------
+
+curl -v -X GET http://pi-esp32:8080/i2c/bus/list
+
+
+For PCA9956B
+------------
+
+Post to register 0 some data (first byte is reg to write to):
+```
+curl -v -X POST --header "Content-Type: application/json" --data '{"values":[128,128,5,0,0,0,0,0,0,0,0]}' http://pi-esp32:8080/i2c/bus/0/write/bytes/32
+```
+Or:
+```
+curl -v -X POST --header "Content-Type: application/json" --data '{"values":[128,5,1,0,0,0,0,0,0,1]}' http://pi-esp32:8080/i2c/bus/0/write/bytes/reg/32/128
+```
+Or write one byte to register: 
+```
+curl -v -X POST http://pi-esp32:8080/i2c/bus/0/write/byte/reg/32/128/128
+```
+
+Select register 0 (AI enabled): 
+```
+curl -v -X POST http://pi-esp32:8080/i2c/bus/0/write/byte/32/128
+```
+
+Get all registers: 
+```
+curl -v -X GET http://pi-esp32:8080/i2c/bus/0/read/bytes/32/63
+```
+
+Or get a byte at a time: 
+```
+curl -v -X GET http://pi-esp32:8080/i2c/bus/0/read/byte/32
+```
+
+Get a register: 
+```
+curl -v -X GET http://pi-esp32:8080/i2c/bus/0/read/reg/32/128/1
+```
+Or multiple:
+```
+curl -v -X GET http://pi-esp32:8080/i2c/bus/0/read/reg/32/128/63
+```
+Or multiple with writing red first:
+
+```
+curl -v -X POST http://pi-esp32:8080/i2c/bus/0/write/byte/32/128
+curl -v -X GET http://pi-esp32:8080/i2c/bus/0/read/bytes/32/63
+```
+
+
+SWRST: 
+```
+curl -v -X POST --header "Content-Type: application/json" --data '{"values":[6]}' http://pi-esp32:8080/i2c/bus/0/write/bytes/0
+```
+
+
