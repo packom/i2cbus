@@ -41,7 +41,7 @@ if [[ ! $BIN ]];
 fi
 
 DIR=tmp/$BIN-$ARCH-$VERSION
-TAG=$BIN-$ARCH:$VERSION
+TAG=packom/$BIN-$ARCH:$VERSION
 
 echo "Creating container for"
 echo "  Binary:   $BIN"
@@ -50,12 +50,13 @@ echo "  Target:   $TARGET"
 echo "  Version:  $VERSION"
 echo "  Tag:      $TAG"
 
-echo "cargo build --release --target $TARGET"
-cargo build --release --target $TARGET
+echo "docker run --rm -v `pwd`:/home/build/builds piersfinlayson/build cargo build --release --target $TARGET"
+docker run --rm -v `pwd`:/home/build/builds piersfinlayson/build cargo build --release --target $TARGET
 rm -fr $DIR
 mkdir -p $DIR
+wget -O $DIR/openapi.yaml https://raw.githubusercontent.com/packom/i2cbus-api/master/api/openapi.yaml 
 cp target/$TARGET/release/$BIN $DIR/
-cp ../$BIN-api/api/openapi.yaml $DIR/api.yaml
+cp $DIR/openapi.yaml $DIR/api.yaml
 echo "docker build -t $TAG -f scripts/Dockerfile $DIR"
 docker build -t $TAG -f scripts/Dockerfile $DIR
 rm -fr $DIR
