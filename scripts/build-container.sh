@@ -54,8 +54,8 @@ rm -fr $DIR
 mkdir -p $DIR
 cp target/$TARGET/release/$BIN $DIR/
 cp ../$BIN-api/api/openapi.yaml $DIR/api.yaml
-#echo "cargo build --release --target $TARGET"
-#cargo build --release --target $TARGET
+echo "cargo build --release --target $TARGET"
+cargo build --release --target $TARGET
 echo "docker build -t $TAG -f scripts/Dockerfile $DIR"
 docker build -t $TAG -f scripts/Dockerfile $DIR
 rm -fr $DIR
