@@ -1,6 +1,7 @@
 //! Main binary entry point for openapi_client implementation.
 
-use httpd_util::{get_server_addr, https, init_app};
+use httpd_util::{get_server_addr, https, init_app, ssl};
+use log::{debug};
 
 #[path = "server.rs"] mod server;
 
@@ -15,7 +16,17 @@ fn main() {
         vec![],
     );
 
+    let ssl = match https() {
+        true => Some(ssl().unwrap()),
+        _ => None,
+    };
+    match ssl {
+        Some(_) => debug!("Using SSL"),
+        None => debug!("Not using SSL"),
+    }
+
     let addr_socket = get_server_addr();
     let addr_string = format!("{}:{}", addr_socket.ip(), addr_socket.port());
-    hyper::rt::run(server::create(&addr_string, https()));
+    debug!("Bind to: {}", addr_string);
+    hyper::rt::run(server::create(&addr_string, ssl));
 }

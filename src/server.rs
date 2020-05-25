@@ -35,7 +35,7 @@ mod http;
 
 #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "ios")))]
 /// Builds an SSL implementation for Simple HTTPS from some hard-coded file names
-pub fn create(addr: &str, https: bool) -> Box<dyn Future<Item = (), Error = ()> + Send> {
+pub fn create(addr: &str, ssl: Option<SslAcceptorBuilder>) -> Box<dyn Future<Item = (), Error = ()> + Send> {
     let addr = addr.parse().expect("Failed to parse bind address");
 
     let server = Server::new();
@@ -49,21 +49,8 @@ pub fn create(addr: &str, https: bool) -> Box<dyn Future<Item = (), Error = ()> 
             service_fn
         );
 
-    if https {
-        #[cfg(any(target_os = "macos", target_os = "windows", target_os = "ios"))]
-        {
-            unimplemented!("SSL is not implemented for the examples on MacOS, Windows or iOS");
-        }
-
-        #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "ios")))]
-        {
-            let mut ssl = SslAcceptor::mozilla_intermediate_v5(SslMethod::tls()).expect("Failed to create SSL Acceptor");
-
-            // Server authentication
-            ssl.set_private_key_file("examples/server-key.pem", SslFiletype::PEM).expect("Failed to set private key");
-            ssl.set_certificate_chain_file("examples/server-chain.pem").expect("Failed to set cerificate chain");
-            ssl.check_private_key().expect("Failed to check private key");
-
+    match ssl {
+        Some(ssl) => {
             let tls_acceptor = ssl.build();
             let service_fn = Arc::new(Mutex::new(service_fn));
             let tls_listener = TcpListener::bind(&addr).unwrap().incoming().for_each(move |tcp| {
@@ -86,10 +73,8 @@ pub fn create(addr: &str, https: bool) -> Box<dyn Future<Item = (), Error = ()> 
             }).map_err(|_| ());
 
             Box::new(tls_listener)
-        }
-    } else {
-        // Using HTTP
-        Box::new(hyper::server::Server::bind(&addr).serve(service_fn).map_err(|e| panic!("{:?}", e)))
+        },
+        None => Box::new(hyper::server::Server::bind(&addr).serve(service_fn).map_err(|e| panic!("{:?}", e))),
     }
 }
 
