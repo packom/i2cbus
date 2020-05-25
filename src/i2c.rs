@@ -122,7 +122,7 @@ impl fmt::Display for BusError {
 }
 
 impl Error for BusError {
-    fn cause(&self) -> Option<&Error> {
+    fn cause(&self) -> Option<&dyn Error> {
         match *self {
             BusError::Io(ref err) => Some(err),
             BusError::LinuxI2CError(ref err) => Some(err),

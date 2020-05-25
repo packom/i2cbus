@@ -1,4 +1,4 @@
-use crate::i2c;
+#[path = "i2c.rs"] mod i2c;
 use i2cbus_api::models;
 use i2cbus_api::{
     I2cBusApiResponse, I2cBusListResponse, I2cBusReadByteResponse, I2cBusReadBytesResponse,
@@ -7,6 +7,8 @@ use i2cbus_api::{
 };
 use std::fs;
 use std::sync::Mutex;
+use lazy_static::lazy_static;
+use log::{info, trace, warn};
 
 // Global used to store BUSES - is initialized first time it is used
 lazy_static! {
@@ -361,6 +363,7 @@ pub(crate) fn read_byte(bus_id: &models::BusId, addr: &models::Addr) -> I2cBusRe
                 Some(
                     values
                         .iter()
+                        .map(|x| <i32>::try_from(*x).unwrap())
                         .map(<models::I2cByte>::from)
                         .collect::<Vec<models::I2cByte>>(),
                 )
@@ -372,6 +375,7 @@ pub(crate) fn read_byte(bus_id: &models::BusId, addr: &models::Addr) -> I2cBusRe
     rsp
 }
 
+use std::convert::TryFrom;
 pub(crate) fn read_bytes(
     bus_id: &models::BusId,
     addr: &models::Addr,
@@ -389,6 +393,7 @@ pub(crate) fn read_bytes(
                 Some(
                     values
                         .iter()
+                        .map(|x| <i32>::try_from(*x).unwrap())
                         .map(<models::I2cByte>::from)
                         .collect::<Vec<models::I2cByte>>(),
                 )
@@ -418,6 +423,7 @@ pub(crate) fn read_reg(
                 Some(
                     values
                         .iter()
+                        .map(|x| <i32>::try_from(*x).unwrap())
                         .map(<models::I2cByte>::from)
                         .collect::<Vec<models::I2cByte>>(),
                 )
@@ -434,14 +440,14 @@ pub(crate) fn get_api() -> I2cBusApiResponse {
     info!("API {}", "get_api");
     let rsp = match fs::read("/static/api.yaml") {
         Ok(api) => match String::from_utf8(api) {
-            Ok(s) => I2cBusApiResponse::OK(models::Yaml::from(s)),
-            Err(e) => I2cBusApiResponse::FileNotFound(models::Error::from(
+            Ok(s) => I2cBusApiResponse::OK(s),
+            Err(e) => I2cBusApiResponse::FileNotFound(
                 format!("Hit error parsing API file {}", e).to_string(),
-            )),
+            ),
         },
-        Err(e) => I2cBusApiResponse::FileNotFound(models::Error::from(
+        Err(e) => I2cBusApiResponse::FileNotFound(
             format!("File not found {}", e).to_string(),
-        )),
+        ),
     };
     info!("API {} -> {:?}", "get_api", rsp);
     rsp
